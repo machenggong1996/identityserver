@@ -8,7 +8,7 @@
         <version>2.1.1.RELEASE</version>
         <relativePath/>
     </parent>
-    <groupId>com.beyondsoft</groupId>
+    <groupId>com.identityserver</groupId>
     <artifactId>identityservice</artifactId>
     <version>1.0.0</version>
     <name>identityservice</name>
