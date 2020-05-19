@@ -1,10 +1,10 @@
 package com.identityserver.config;
 
+import com.identityserver.pojo.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -46,7 +46,7 @@ public class CustomTokenEnhancer implements TokenEnhancer {
                 claims.put("authorities", auths);
                 claims.put("sub", user.getUsername());
                 claims.put("scope", accessToken.getScope());
-                Long time = new Date().getTime() + 24 * 3600 * 1000;
+                Long time = System.currentTimeMillis() + 24 * 3600 * 1000;
                 String compactJws = Jwts.builder().setHeaderParam("typ", "JWT")
                         .setHeaderParam("alg", "RS256")
                         .setSubject("MyService")

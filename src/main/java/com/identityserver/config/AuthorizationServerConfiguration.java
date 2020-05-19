@@ -32,13 +32,12 @@ import org.springframework.security.oauth2.provider.implicit.ImplicitTokenGrante
 import org.springframework.security.oauth2.provider.password.ResourceOwnerPasswordTokenGranter;
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 import org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory;
+import org.springframework.security.oauth2.provider.token.DefaultAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenEnhancer;
 import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
-import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
-import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFactory;
 
 import javax.sql.DataSource;
@@ -87,38 +86,43 @@ class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdap
         // CustomTokenEnhancer 是我自定义一些数据放到token里用的
         tokenEnhancerChain.setTokenEnhancers(Arrays.asList(new CustomTokenEnhancer()));
         //支持GET  POST  请求获取token
+        DefaultAccessTokenConverter defaultAccessTokenConverter=new DefaultAccessTokenConverter();
+        CustomUserAuthenticationConverter customUserAuthenticationConverter = new CustomUserAuthenticationConverter();
+        customUserAuthenticationConverter.setUserDetailsService(userDetailsService);
+        defaultAccessTokenConverter.setUserTokenConverter(customUserAuthenticationConverter);
         endpoints.tokenStore(tokenStore())
-                .reuseRefreshTokens(false)
-                .authenticationManager(authenticationManager)
-                .userDetailsService(userDetailsService)
-                .tokenEnhancer(tokenEnhancerChain)
-                .tokenGranter(tokenGranter())
-                .authorizationCodeServices(authorizationCodeServices())
-                .userApprovalHandler(userApprovalHandler())
-                .accessTokenConverter(accessTokenConverter())
-                .allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST);
+                        .reuseRefreshTokens(false)
+                        .authenticationManager(authenticationManager)
+                        .userDetailsService(userDetailsService)
+                        .tokenEnhancer(tokenEnhancerChain)
+                        .tokenGranter(tokenGranter())
+                        .authorizationCodeServices(authorizationCodeServices())
+                        .userApprovalHandler(userApprovalHandler())
+                        .accessTokenConverter(defaultAccessTokenConverter)
+                        .allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST);
 
-//        endpoints.authenticationManager(authenticationManager).allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST);//.accessTokenConverter(accessTokenConverter);
-//        DefaultTokenServices tokenServices = new DefaultTokenServices();
-//        tokenServices.setTokenStore(tokenStore());
-//        tokenServices.setSupportRefreshToken(true);
-//        tokenServices.setClientDetailsService(clientDetails());
-//        tokenServices.setTokenEnhancer(tokenEnhancer());
-//        tokenServices.setAccessTokenValiditySeconds((int) TimeUnit.MINUTES.toSeconds(1));
-//        endpoints.tokenServices(tokenServices);
+        //        endpoints.authenticationManager(authenticationManager).allowedTokenEndpointRequestMethods
+        //        (HttpMethod.GET, HttpMethod.POST);//.accessTokenConverter(accessTokenConverter);
+        //        DefaultTokenServices tokenServices = new DefaultTokenServices();
+        //        tokenServices.setTokenStore(tokenStore());
+        //        tokenServices.setSupportRefreshToken(true);
+        //        tokenServices.setClientDetailsService(clientDetails());
+        //        tokenServices.setTokenEnhancer(tokenEnhancer());
+        //        tokenServices.setAccessTokenValiditySeconds((int) TimeUnit.MINUTES.toSeconds(1));
+        //        endpoints.tokenServices(tokenServices);
         // 注入authenticationManager来支持password模式
-//        endpoints.authenticationManager(authenticationManager);
-//        endpoints.accessTokenConverter(accessTokenConverter());
-//        endpoints.tokenStore(tokenStore());
-//        // !!!要使用refresh_token的话，需要额外配置userDetailsService!!!
-//        endpoints.userDetailsService(userDetailsService);
-//        endpoints.reuseRefreshTokens(true);
-//        endpoints.tokenGranter(tokenGranter());
-//        endpoints.authorizationCodeServices(authorizationCodeServices());
-//        // 设了 tokenGranter 后该配制失效,需要在 tokenServices() 中设置
-/////        endpoints.tokenEnhancer(tokenEnhancerChain);
-//        endpoints.userApprovalHandler(userApprovalHandler());
-//        endpoints.allowedTokenEndpointRequestMethods(HttpMethod.GET,HttpMethod.POST);
+        //        endpoints.authenticationManager(authenticationManager);
+        //endpoints.accessTokenConverter(accessTokenConverter());
+        //        endpoints.tokenStore(tokenStore());
+        //        // !!!要使用refresh_token的话，需要额外配置userDetailsService!!!
+        //        endpoints.userDetailsService(userDetailsService);
+        //        endpoints.reuseRefreshTokens(true);
+        //        endpoints.tokenGranter(tokenGranter());
+        //        endpoints.authorizationCodeServices(authorizationCodeServices());
+        //        // 设了 tokenGranter 后该配制失效,需要在 tokenServices() 中设置
+        /////        endpoints.tokenEnhancer(tokenEnhancerChain);
+        //        endpoints.userApprovalHandler(userApprovalHandler());
+        //        endpoints.allowedTokenEndpointRequestMethods(HttpMethod.GET,HttpMethod.POST);
     }
 
     @Bean
@@ -138,16 +142,17 @@ class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdap
     @Bean
     public KeyPair keyPair() {
         KeyStoreKeyFactory keyStoreKeyFactory = new KeyStoreKeyFactory(new ClassPathResource("jwt.jks"),
-                "keypass".toCharArray());
+                                                                       "keypass".toCharArray());
         return keyStoreKeyFactory.getKeyPair("jwt");
     }
 
     @Bean
-    public JwtAccessTokenConverter accessTokenConverter() {
-        JwtAccessTokenConverter accessTokenConverter = new JwtAccessTokenConverter();
-        accessTokenConverter.setKeyPair(keyPair());
-        // 测试用,资源服务使用相同的字符达到一个对称加密的效果,生产时候使用RSA非对称加密方式
-        //accessTokenConverter.setSigningKey("123");
+    public DefaultAccessTokenConverter accessTokenConverter() {
+        DefaultAccessTokenConverter accessTokenConverter = new DefaultAccessTokenConverter();
+        CustomUserAuthenticationConverter customUserAuthenticationConverter = new CustomUserAuthenticationConverter();
+        customUserAuthenticationConverter.setUserDetailsService(userDetailsService);
+
+        accessTokenConverter.setUserTokenConverter(customUserAuthenticationConverter);
         return accessTokenConverter;
     }
 
@@ -163,24 +168,6 @@ class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdap
         return approvalStore;
     }
 
-    /**
-     * token 转换器，加入对称秘钥，使用自定tokenEnhancer
-     *
-     * @return
-     */
-//    @Bean
-//    public JwtAccessTokenConverter accessTokenConverter() {
-//        JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
-//        converter.setSigningKey("secretKey");
-//        return converter;
-//    }
-//    @Bean
-//    public TokenEnhancer tokenEnhancer() {
-//        TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
-//        // CustomTokenEnhancer 是我自定义一些数据放到token里用的
-//        tokenEnhancerChain.setTokenEnhancers(Arrays.asList(new CustomTokenEnhancer(), accessTokenConverter()));
-//        return tokenEnhancerChain;
-//    }
     @Bean
     public TokenEnhancer tokenEnhancer() {
         TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
@@ -188,7 +175,6 @@ class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdap
         tokenEnhancerChain.setTokenEnhancers(Arrays.asList(new CustomTokenEnhancer()));
         return new CustomTokenEnhancer();
     }
-
 
     /**
      * 通过 tokenGranter 塞进去的就是它了
@@ -211,21 +197,22 @@ class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdap
 
         List<TokenGranter> tokenGranters = new ArrayList<>();
         tokenGranters.add(new AuthorizationCodeTokenGranter(authorizationServerTokenServices(),
-                authorizationCodeServices(), clientDetails(), oAuth2RequestFactory()));
+                                                            authorizationCodeServices(), clientDetails(),
+                                                            oAuth2RequestFactory()));
         tokenGranters.add(new RefreshTokenGranter(authorizationServerTokenServices(), clientDetails(),
-                oAuth2RequestFactory()));
-        ImplicitTokenGranter implicit = new ImplicitTokenGranter(authorizationServerTokenServices(),
-                clientDetails(), oAuth2RequestFactory());
+                                                  oAuth2RequestFactory()));
+        ImplicitTokenGranter implicit = new ImplicitTokenGranter(authorizationServerTokenServices(), clientDetails(),
+                                                                 oAuth2RequestFactory());
         tokenGranters.add(implicit);
         tokenGranters.add(new ClientCredentialsTokenGranter(authorizationServerTokenServices(), clientDetails(),
-                oAuth2RequestFactory()));
+                                                            oAuth2RequestFactory()));
         if (authenticationManager != null) {
             tokenGranters.add(new ResourceOwnerPasswordTokenGranter(authenticationManager,
-                    authorizationServerTokenServices(), clientDetails(), oAuth2RequestFactory()));
+                                                                    authorizationServerTokenServices(), clientDetails(),
+                                                                    oAuth2RequestFactory()));
         }
         return tokenGranters;
     }
-
 
     @Bean
     public AuthorizationCodeServices authorizationCodeServices() {
@@ -243,11 +230,6 @@ class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdap
         // 如果没有设置它,JWT就失效了.
         defaultTokenServices.setTokenEnhancer(tokenEnhancer());
         return defaultTokenServices;
-    }
-
-    @Bean
-    public TokenStore JwtTokenStore() {
-        return new JwtTokenStore(accessTokenConverter());
     }
 
     @Override

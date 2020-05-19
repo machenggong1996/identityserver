@@ -16,6 +16,8 @@ spring:
       max-lifetime: 60000
       connection-timeout: 3000000
       connection-test-query: SELECT 1
+  main:
+    allow-bean-definition-overriding: true
 
 thymeleaf:
   prefix: classpath:/templates/
@@ -30,3 +32,11 @@ security:
   security-realm: Spring Boot JWT Example Realm
 
 jwt.jks.keypass: keypass
+
+spring.security.oauth2.clientId: 008fec3d-c125-409e-9f8d-ef7724ec21df
+spring.security.oauth2.clientSecret: 222
+spring.security.oauth2.authorization.check-token-access: http://localhost:8080/oauth/check_token
+spring.security.oauth2.host: http://localhost:8080
+spring.security.oauth2.resourceId: system
+
+

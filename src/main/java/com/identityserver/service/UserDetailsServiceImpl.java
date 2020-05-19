@@ -1,16 +1,13 @@
 package com.identityserver.service;
 
 import com.identityserver.mapper.ManageMapper;
+import com.identityserver.pojo.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,12 +26,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (password == null) {
             throw new UsernameNotFoundException(String.format("The username %s doesn't exist", userName));
         }
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        roles.forEach(role -> {
-            authorities.add(new SimpleGrantedAuthority(role));
-        });
-        UserDetails userDetails = new User(userName, password, authorities);
-        System.out.println(userDetails.getAuthorities());
+        User userDetails = new User(userName, password, roles, "11111");
         return userDetails;
     }
 }
