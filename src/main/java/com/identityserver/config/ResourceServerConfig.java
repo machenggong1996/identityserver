@@ -41,25 +41,24 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         resources.resourceId(oauth2ResourceId);
     }
 
-    @Primary
-    @Bean
-    public RemoteTokenServices tokenServices() {
-        final RemoteTokenServices tokenService = new RemoteTokenServices();
-        tokenService.setCheckTokenEndpointUrl(String.format("%s/oauth/check_token", host));
-        tokenService.setClientId(clientId);
-        tokenService.setClientSecret(clientSecret);
-        return tokenService;
-    }
+    /**
+     * 即作为授权服务又作为资源服务可以不需要check_token
+     */
+
+    //    @Primary
+    //    @Bean
+    //    public RemoteTokenServices tokenServices() {
+    //        final RemoteTokenServices tokenService = new RemoteTokenServices();
+    //        tokenService.setCheckTokenEndpointUrl(String.format("%s/oauth/check_token", host));
+    //        tokenService.setClientId(clientId);
+    //        tokenService.setClientSecret(clientSecret);
+    //        return tokenService;
+    //    }
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().and().csrf().disable()
-                        .authorizeRequests()
-                        .antMatchers("/userlogin").permitAll()
-                        .antMatchers("/**")
-                        .access("#oauth2.hasScope('write')")
-                        .and()
-                        .exceptionHandling()
+        http.authorizeRequests().and().csrf().disable().authorizeRequests().antMatchers("/userlogin").permitAll()
+                        .antMatchers("/**").access("#oauth2.hasScope('write')").and().exceptionHandling()
                         .accessDeniedHandler(customAccessDeniedHandler);
     }
 
