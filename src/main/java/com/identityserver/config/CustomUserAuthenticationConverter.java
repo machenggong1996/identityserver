@@ -1,24 +1,15 @@
 package com.identityserver.config;
 
-import com.identityserver.pojo.User;
-import com.identityserver.service.UserDetailsServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.provider.token.DefaultUserAuthenticationConverter;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static org.springframework.security.oauth2.provider.token.UserAuthenticationConverter.USERNAME;
-
 /**
- * @author shanshu ()
+ * @author machenggong
  * @date 2020/05/19
  */
 @Component

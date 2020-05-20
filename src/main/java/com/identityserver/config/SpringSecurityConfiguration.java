@@ -81,8 +81,8 @@ public class SpringSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
         http.cors().disable().csrf().disable().authorizeRequests().requestMatchers(CorsUtils::isPreFlightRequest)
                         .permitAll().and()
-                        //                        .exceptionHandling().accessDeniedHandler(accessDeniedHandler).and()
-                        //                        .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
+                        //                        .exceptionHandling().accessDeniedHandler(accessDeniedHandler).and()//权限禁止
+                        //                        .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)//认证失败
                         //                        .and()
                         // 基于token，所以不需要session
                         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
@@ -90,14 +90,12 @@ public class SpringSecurityConfiguration extends WebSecurityConfigurerAdapter {
                         .authorizeRequests()
 
                         // 对于获取token的rest api要允许匿名访问
-                        .antMatchers("/api/v1/login", "/api/v1/sign", "/error/**").permitAll()
+                        .antMatchers("/userlogin", "/api/v1/sign", "/error/**").permitAll()
                         // 除上面外的所有请求全部需要鉴权认证
                         .anyRequest().authenticated();
 
         // 禁用缓存
         http.headers().cacheControl();
-
-        http.addFilterBefore(authenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
     }
 }

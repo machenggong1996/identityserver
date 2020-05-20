@@ -13,7 +13,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
 
 /**
- * @author shanshu ()
+ * @author machenggong
  * @date 2020/05/18
  */
 @Configuration
@@ -53,8 +53,13 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().and().csrf().disable().authorizeRequests().antMatchers("/**")
-                        .access("#oauth2.hasScope('write')").and().exceptionHandling()
+        http.authorizeRequests().and().csrf().disable()
+                        .authorizeRequests()
+                        .antMatchers("/userlogin").permitAll()
+                        .antMatchers("/**")
+                        .access("#oauth2.hasScope('write')")
+                        .and()
+                        .exceptionHandling()
                         .accessDeniedHandler(customAccessDeniedHandler);
     }
 
