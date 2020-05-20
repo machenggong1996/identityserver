@@ -18,7 +18,16 @@ spring:
       connection-test-query: SELECT 1
   main:
     allow-bean-definition-overriding: true
-
+  redis:
+    database: 0
+    host: localhost
+    port: 6379
+    password:
+    jedis:
+      pool:
+        max-active: 8
+        min-idle: 0
+        max-idle: 8
 thymeleaf:
   prefix: classpath:/templates/
 
@@ -38,5 +47,3 @@ spring.security.oauth2.clientSecret: 222
 spring.security.oauth2.authorization.check-token-access: http://localhost:8080/oauth/check_token
 spring.security.oauth2.host: http://localhost:8080
 spring.security.oauth2.resourceId: system
-
-

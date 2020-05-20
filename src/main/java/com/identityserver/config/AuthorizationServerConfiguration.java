@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -39,6 +41,7 @@ import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFactory;
+import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
 
 import javax.sql.DataSource;
 import java.security.KeyPair;
@@ -57,12 +60,23 @@ class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdap
     @Qualifier("dataSource")
     private DataSource dataSource;
 
+    /**
+     * redis存储token
+     */
+    @Autowired
+    private RedisConnectionFactory redisConnectionFactory;
+
     @Autowired
     UserDetailsServiceImpl userDetailsService;
 
-    @Bean // 声明TokenStore实现
+    //    @Bean // 声明TokenStore实现
+    //    public TokenStore tokenStore() {
+    //        return new JdbcTokenStore(dataSource);
+    //    }
+
+    @Bean
     public TokenStore tokenStore() {
-        return new JdbcTokenStore(dataSource);
+        return new RedisTokenStore(redisConnectionFactory);
     }
 
     @Bean // 声明 ClientDetails实现
@@ -86,19 +100,14 @@ class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdap
         // CustomTokenEnhancer 是我自定义一些数据放到token里用的
         tokenEnhancerChain.setTokenEnhancers(Arrays.asList(new CustomTokenEnhancer()));
         //支持GET  POST  请求获取token
-        DefaultAccessTokenConverter defaultAccessTokenConverter=new DefaultAccessTokenConverter();
+        DefaultAccessTokenConverter defaultAccessTokenConverter = new DefaultAccessTokenConverter();
         CustomUserAuthenticationConverter customUserAuthenticationConverter = new CustomUserAuthenticationConverter();
         customUserAuthenticationConverter.setUserDetailsService(userDetailsService);
         defaultAccessTokenConverter.setUserTokenConverter(customUserAuthenticationConverter);
-        endpoints.tokenStore(tokenStore())
-                        .reuseRefreshTokens(false)
-                        .authenticationManager(authenticationManager)
-                        .userDetailsService(userDetailsService)
-                        .tokenEnhancer(tokenEnhancerChain)
-                        .tokenGranter(tokenGranter())
-                        .authorizationCodeServices(authorizationCodeServices())
-                        .userApprovalHandler(userApprovalHandler())
-                        .accessTokenConverter(defaultAccessTokenConverter)
+        endpoints.tokenStore(tokenStore()).reuseRefreshTokens(false).authenticationManager(authenticationManager)
+                        .userDetailsService(userDetailsService).tokenEnhancer(tokenEnhancerChain)
+                        .tokenGranter(tokenGranter()).authorizationCodeServices(authorizationCodeServices())
+                        .userApprovalHandler(userApprovalHandler()).accessTokenConverter(defaultAccessTokenConverter)
                         .allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST);
 
         //        endpoints.authenticationManager(authenticationManager).allowedTokenEndpointRequestMethods
@@ -220,16 +229,35 @@ class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdap
         return new InMemoryAuthorizationCodeServices();
     }
 
+    //    @Bean
+    //    public DefaultTokenServices authorizationServerTokenServices() {
+    //        DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
+    //        defaultTokenServices.setTokenStore(tokenStore());//影响自定义tokenEnhancer
+    //        defaultTokenServices.setSupportRefreshToken(true);
+    //        //token 有效时间,默认12h
+    //        defaultTokenServices.setClientDetailsService(clientDetails());
+    //        // 如果没有设置它,JWT就失效了.
+    //        defaultTokenServices.setTokenEnhancer(tokenEnhancer());
+    //        return defaultTokenServices;
+    //    }
+
+    /**
+     * <p>注意，自定义TokenServices的时候，需要设置@Primary，否则报错，</p>
+     *
+     * @return
+     */
+    @Primary
     @Bean
     public DefaultTokenServices authorizationServerTokenServices() {
-        DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
-        defaultTokenServices.setTokenStore(tokenStore());//影响自定义tokenEnhancer
-        defaultTokenServices.setSupportRefreshToken(true);
-        //token 有效时间,默认12h
-        defaultTokenServices.setClientDetailsService(clientDetails());
-        // 如果没有设置它,JWT就失效了.
-        defaultTokenServices.setTokenEnhancer(tokenEnhancer());
-        return defaultTokenServices;
+        DefaultTokenServices tokenServices = new DefaultTokenServices();
+        tokenServices.setTokenStore(tokenStore());
+        tokenServices.setSupportRefreshToken(true);
+        //tokenServices.setClientDetailsService(clientDetails());
+        // token有效期自定义设置，默认12小时
+        tokenServices.setAccessTokenValiditySeconds(60 * 60 * 12);
+        // refresh_token默认30天
+        tokenServices.setRefreshTokenValiditySeconds(60 * 60 * 24 * 7);
+        return tokenServices;
     }
 
     @Override
