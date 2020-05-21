@@ -1,5 +1,6 @@
 package com.identityserver.config;
 
+import com.identityserver.exception.CustomWebResponseExceptionTranslator;
 import com.identityserver.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,7 +100,8 @@ class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdap
                         .authorizationCodeServices(authorizationCodeServices())
                         .userApprovalHandler(userApprovalHandler())
                         .accessTokenConverter(defaultAccessTokenConverter)
-                        .allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST);
+                        .allowedTokenEndpointRequestMethods(HttpMethod.GET, HttpMethod.POST)
+                        .exceptionTranslator(new CustomWebResponseExceptionTranslator());
 
         //        endpoints.authenticationManager(authenticationManager).allowedTokenEndpointRequestMethods
         //        (HttpMethod.GET, HttpMethod.POST);//.accessTokenConverter(accessTokenConverter);
