@@ -20,7 +20,7 @@ public class GlobalCorsConfig {
                         //是否发送Cookie信息
                         .allowCredentials(true)
                         //放行哪些原始域(请求方式)
-                        .allowedMethods("GET","POST", "PUT", "DELETE")
+                        .allowedMethods("GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS")
                         //放行哪些原始域(头部信息)
                         .allowedHeaders("*")
                         //暴露哪些头部信息（因为跨域访问默认不能获取全部头部信息）
