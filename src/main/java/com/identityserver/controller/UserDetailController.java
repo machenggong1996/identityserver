@@ -1,6 +1,7 @@
 package com.identityserver.controller;
 
 import com.identityserver.util.ResponseResult;
+import com.identityserver.util.SecurityUtils;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -68,6 +69,7 @@ public class UserDetailController {
     @GetMapping("/noParamTarget")
     public ResponseResult redirectTarget() {
         ResponseResult result = new ResponseResult();
+        com.identityserver.pojo.User user = SecurityUtils.getUser();
         //Dept dept = restTemplate.getForObject(DEPT_GET_URL + id, Dept.class);
         JSONObject token = restTemplate
                         .exchange("http://localhost:8080/oauth/token?password=222&grant_type=password&username=aaa",
