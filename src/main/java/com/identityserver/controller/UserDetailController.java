@@ -1,18 +1,17 @@
 package com.identityserver.controller;
 
 import com.identityserver.util.ResponseResult;
+import com.identityserver.util.SecurityUtils;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,11 +19,9 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.endpoint.TokenEndpoint;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.view.RedirectView;
-import sun.security.util.SecurityConstants;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
@@ -68,6 +65,7 @@ public class UserDetailController {
     @GetMapping("/noParamTarget")
     public ResponseResult redirectTarget() {
         ResponseResult result = new ResponseResult();
+        com.identityserver.pojo.User user = SecurityUtils.getUser();
         //Dept dept = restTemplate.getForObject(DEPT_GET_URL + id, Dept.class);
         JSONObject token = restTemplate
                         .exchange("http://localhost:8080/oauth/token?password=222&grant_type=password&username=aaa",
