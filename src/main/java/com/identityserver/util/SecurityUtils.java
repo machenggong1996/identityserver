@@ -4,7 +4,7 @@ import com.identityserver.pojo.User;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
- * @author shanshu ()
+ * @author machenggong
  * @date 2020/05/19
  */
 public class SecurityUtils {

@@ -47,3 +47,5 @@ spring.security.oauth2.clientSecret: 222
 spring.security.oauth2.authorization.check-token-access: http://localhost:8080/oauth/check_token
 spring.security.oauth2.host: http://localhost:8080
 spring.security.oauth2.resourceId: system
+
+
