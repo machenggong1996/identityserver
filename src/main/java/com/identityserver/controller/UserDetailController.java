@@ -91,7 +91,7 @@ public class UserDetailController {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(user, null,
                                                                                                           authorities);
         HashMap<String, String> map = new HashMap<>();
-        map.put("password", "222");
+        map.put("password", "221");
         map.put("grant_type", "password");
         map.put("username", "aaa");
         ResponseEntity<OAuth2AccessToken> responseEntity = tokenEndpoint.getAccessToken(authenticationToken, map);
