@@ -70,33 +70,37 @@ public class SpringSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        //        http.csrf().disable()
-        //                .authorizeRequests()
-        //                .antMatchers("/", "/oauth/**", "/login", "/health", "/css/**", "/register/**","/exist/**",
-        //                "/updatePasswordByUsername/**","/noParamRedirect/**").permitAll()
-        //                .anyRequest().authenticated();
-        ////                .and()
-        ////                .formLogin()
-        ////                .loginPage("/login")
-        ////                .permitAll().and().logout();
-
-        http.cors().disable().csrf().disable().authorizeRequests().requestMatchers(CorsUtils::isPreFlightRequest)
-                        .permitAll().and()
-                        //                        .exceptionHandling().accessDeniedHandler(accessDeniedHandler).and()//权限禁止
-                        //                        .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)//认证失败
-                        //                        .and()
-                        // 基于token，所以不需要session
-                        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-
+                http.csrf().disable()
                         .authorizeRequests()
+                        .antMatchers("/", "/oauth/**", "/login", "/health", "/css/**", "/register/**","/exist/**",
+                        "/updatePasswordByUsername/**","/noParamRedirect/**").permitAll()
+                        .anyRequest().authenticated()
+                        .and()
+                        .formLogin()
+                        .loginPage("/login")
+                        .permitAll().and().logout();
 
-                        // 对于获取token的rest api要允许匿名访问
-                        .antMatchers("/userlogin", "/swagger-ui.html").permitAll()
-                        // 除上面外的所有请求全部需要鉴权认证
-                        .anyRequest().authenticated();
+//        http.authorizeRequests().anyRequest().fullyAuthenticated();
+//        http.formLogin().loginPage("/login").failureUrl("/login?error").permitAll();
+//        http.logout().permitAll();
+
+//        http.cors().disable().csrf().disable().authorizeRequests().requestMatchers(CorsUtils::isPreFlightRequest)
+//                        .permitAll().and()
+//                        //                        .exceptionHandling().accessDeniedHandler(accessDeniedHandler).and()//权限禁止
+//                        //                        .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)//认证失败
+//                        //                        .and()
+//                        // 基于token，所以不需要session
+//                        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+//
+//                        .authorizeRequests()
+//
+//                        // 对于获取token的rest api要允许匿名访问
+//                        .antMatchers("/userlogin", "/swagger-ui.html").permitAll()
+//                        // 除上面外的所有请求全部需要鉴权认证
+//                        .anyRequest().authenticated();
 
         // 禁用缓存
-        http.headers().cacheControl();
+        //http.headers().cacheControl();
 
     }
 

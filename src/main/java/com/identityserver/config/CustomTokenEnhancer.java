@@ -53,7 +53,7 @@ public class CustomTokenEnhancer implements TokenEnhancer {
                         .setClaims(claims)//用户身份声明
                         .setIssuedAt(new Date())//认证提供时间
                         .setExpiration(new Date(time))//token过期时间
-                        .setIssuer("http://139.219.11.211:30920")//认证提供者
+                        .setIssuer("http://localhost:8080")//认证提供者
                         .setAudience(authentication.getOAuth2Request().getClientId())//受众
                         .signWith(SignatureAlgorithm.RS256, keyPair.getPrivate()).compact();
                 //生成jwt token 考虑加密 编码

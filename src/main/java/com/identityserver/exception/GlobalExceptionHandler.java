@@ -23,11 +23,11 @@ public class GlobalExceptionHandler {
      * @param e
      * @return
      */
-    @ExceptionHandler(value = Exception.class)
-    @ResponseBody
-    public ResponseResult cExceptionHandler(HttpServletRequest req, Exception e) {
-        log.error("发生业务异常！原因是：{}", e.getMessage());
-        return ResponseResult.builder().code(500).msg(e.getMessage()).build();
-    }
+//    @ExceptionHandler(value = Exception.class)
+//    @ResponseBody
+//    public ResponseResult cExceptionHandler(HttpServletRequest req, Exception e) {
+//        log.error("发生业务异常！原因是：{}", e.getMessage());
+//        return ResponseResult.builder().code(500).msg(e.getMessage()).build();
+//    }
 
 }
